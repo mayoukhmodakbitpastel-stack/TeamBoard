@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-ydm*2!58r)-fldvl9_7o37##gduzuj1mqx&=m(nrl%!2=_8dk7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -84,14 +84,36 @@ APPEND_SLASH = False
 #     }
 # }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',        
+#         'USER': 'postgres',     
+#         'PASSWORD': 'root',          
+#         'HOST': 'localhost',                  
+#         'PORT': '5432',                      
+#     }
+# }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.getenv('DB_NAME', 'postgres'),
+#         'USER': os.getenv('DB_USER', 'postgres'),
+#         'PASSWORD': os.getenv('DB_PASSWORD', 'root'),
+#         'HOST': os.getenv('DB_HOST', 'localhost'),
+#         'PORT': os.getenv('DB_PORT', '5432'),
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',         # <-- your PostgreSQL DB name
-        'USER': 'postgres',     # <-- usually 'postgres'
-        'PASSWORD': 'root',          # <-- your PostgreSQL password
-        'HOST': 'localhost',                  # <-- or 127.0.0.1
-        'PORT': '5432',                       # <-- default PostgreSQL port
+        'NAME': os.environ.get('DB_NAME', 'demo_app_k7v1'),
+        'USER': os.environ.get('DB_USER', 'demo_app_k7v1_user'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'FX2po67NuhaIynVgEO8IQnNPU1TkLk4t'),
+        'HOST': os.environ.get('DB_HOST', 'dpg-d3tlvnhr0fns73ajqcjg-a.oregon-postgres.render.com'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
