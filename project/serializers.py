@@ -57,60 +57,6 @@ class ProjectSerializer(serializers.ModelSerializer):
 
         return super().create(validated_data)
 
-
-# class ProjectMemberSerializer(serializers.ModelSerializer):
-#     project_id = serializers.CharField(write_only=True)
-#     member_id = serializers.CharField(write_only=True)
-#     id = serializers.SerializerMethodField(read_only=True)
-#     member_name = serializers.SerializerMethodField(read_only=True)
-#     hashed_project_id = serializers.SerializerMethodField(read_only=True)
-#     hashed_member_id = serializers.SerializerMethodField(read_only=True)
-
-#     class Meta:
-#         model = ProjectMember
-#         fields = ['id', 'project_id', 'member_id', 'hashed_project_id', 'hashed_member_id', 'is_admin', 'member_name']
-
-#     def get_id(self, obj):
-#         return obj.id
-
-#     def get_member_name(self, obj):
-#         return obj.member.first_name if obj.member else None
-
-#     def get_hashed_project_id(self, obj):
-#         if obj.project:
-#             return md5_hash_project_id(obj.project.id)
-#         return None
-
-#     def get_hashed_member_id(self, obj):
-#         if obj.member:
-#             return md5_hash_employee_id(obj.member.id)
-#         return None
-
-#     def validate(self, attrs):
-#         project_decoded = md5_decode_project_id(attrs['project_id'], Project)
-#         member_decoded = md5_decode_employee_id(attrs['member_id'], Employee)
-
-#         if not project_decoded or not member_decoded:
-#             raise serializers.ValidationError("Invalid Project or Member ID.")
-
-#         try:
-#             attrs['project'] = Project.objects.get(id=project_decoded, status='1')
-#         except Project.DoesNotExist:
-#             raise serializers.ValidationError("Project not found or inactive.")
-
-#         try:
-#             attrs['member'] = Employee.objects.get(id=member_decoded, status='1')
-#         except Employee.DoesNotExist:
-#             raise serializers.ValidationError("Employee not found or inactive.")
-
-#         return attrs
-
-#     def create(self, validated_data):
-#         validated_data.pop('project_id', None)
-#         validated_data.pop('member_id', None)
-#         return super().create(validated_data)
-
-
 class ProjectMemberSerializer(serializers.ModelSerializer):
     project_id = serializers.CharField()
     member_id = serializers.CharField()

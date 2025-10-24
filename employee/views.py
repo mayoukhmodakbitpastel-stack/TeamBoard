@@ -71,48 +71,12 @@ def list_employees(request):
         # }
     }, status=status.HTTP_200_OK)
 
-# @api_view(['POST'])  # POST request for fetching a specific employee
-# def get_employee(self,request,hashed_id):
-#     user_id = decode_id(hashed_id)
-    
-#     employee = Employee.objects.get(id=request.data.get('id'))
-#     serializer = EmployeeSerializer(employee)
-#     return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-# @api_view(['POST'])
-# def get_employee(request):
-#     employee_id = request.data.get('id')  # Accept raw ID
-
-#     if not employee_id:
-#         return Response({
-#             "status": "error",
-#             "message": "Missing 'id' in request body.",
-#             "data": {}
-#         }, status=status.HTTP_400_BAD_REQUEST)
-
-#     try:
-#         employee = Employee.objects.get(id=employee_id)
-#     except Employee.DoesNotExist:
-#         return Response({
-#             "status": "error",
-#             "message": "Employee not found.",
-#             "data": {}
-#         }, status=status.HTTP_404_NOT_FOUND)
-
-#     # Use UserSerializer which includes hashed_id
-#     serializer = UserSerializer(employee)
-#     return Response({
-#         "status": "success",
-#         "message": "Employee fetched successfully.",
-#         "data": serializer.data
-#     }, status=status.HTTP_200_OK)
 @api_view(['POST'])
 def get_employee(request):
     # numeric_id = request.data.get('id')
     hashed_id = request.data.get('id')
 
-    if hashed_id: # to be enabled if md5_hash lookup is needed
+    if hashed_id:
         # search by hashed_id
         matched_employee = None
         for emp in Employee.objects.all():
@@ -157,17 +121,7 @@ def delete_employee(request):
     hashed_id = request.data.get('id')
 
     employee = None
-
-    # Handle either plain ID or hashed ID
-    # if emp_id:
-    #     try:
-    #         employee = Employee.objects.get(id=emp_id)
-    #     except Employee.DoesNotExist:
-    #         return Response({
-    #             "status": "error",
-    #             "message": f"No employee found with ID {emp_id}",
-    #             "data": {}
-    #         }, status=status.HTTP_404_NOT_FOUND)
+    
     if hashed_id:
         # Brute-force search for the employee using hashed ID
         for emp in Employee.objects.all():
@@ -190,12 +144,6 @@ def delete_employee(request):
     # Perform soft-delete by setting status = '5'
     employee.status = '5'
     employee.save()
-
-    # Soft delete associated records 
-    # For example:
-    # employee.projects.update(status='5')
-    # employee.tasks.update(status='5')
-    # Add logic for related models here as needed
 
     return Response({
         "status": "OK",

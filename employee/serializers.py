@@ -4,7 +4,7 @@ from django.contrib.auth.hashers import make_password
 from .hashid import encode_id
 from .md5_hash import md5_hash_id
 class UserSerializer(serializers.ModelSerializer):
-    id = serializers.SerializerMethodField() #this is to fetch hashed id
+    id = serializers.SerializerMethodField() # fetch hashed id
 
     class Meta:
         model = Employee
@@ -16,7 +16,7 @@ class UserSerializer(serializers.ModelSerializer):
             'phone_number', 
             'address', 
             'profile_image_url'
-            ]  # don't include 'id' if you want to hide it
+            ]  # don't include 'id' if need to hide
         extra_kwargs = {
             'system_creation_time': {'required': False},
             'system_update_time': {'required': False},
@@ -28,7 +28,7 @@ class UserSerializer(serializers.ModelSerializer):
         return md5_hash_id(obj.id)
 
 class EmployeeSerializer(serializers.ModelSerializer):
-    id = serializers.SerializerMethodField() #this is to fetch hashed id
+    id = serializers.SerializerMethodField() #to fetch hashed id
     class Meta:
         model = Employee
         fields = '__all__'

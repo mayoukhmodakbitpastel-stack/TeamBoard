@@ -1,5 +1,3 @@
-# employee/models.py
-
 from django.db import models
 from .md5_hash import md5_hash_id as md5_hash_employee_id
 class Employee(models.Model):

@@ -11,25 +11,6 @@ from .models import Project,ProjectMember
 from .md5_hash import md5_hash_project_id, md5_decode_project_id
 from employee.md5_hash import md5_hash_id as md5_hash_employee_id, md5_decode_id as md5_decode_employee_id
 
-# @api_view(['POST'])
-# def create_project(request):
-#     serializer = ProjectSerializer(data=request.data)
-#     if serializer.is_valid():
-#         project = serializer.save()
-#         response_data = ProjectSerializer(project).data
-#         # is admin = True by default for creator
-#         return Response({
-#             "status": "OK",
-#             "message": "Project created successfully",
-#             "data": response_data
-#         }, status=drf_status.HTTP_201_CREATED)
-    
-#     return Response({
-#         "status": "error",
-#         "message": "Validation failed",
-#         "data": serializer.errors
-#     }, status=drf_status.HTTP_400_BAD_REQUEST)
-
 @api_view(['POST'])
 def create_project(request):
     serializer = ProjectSerializer(data=request.data)
@@ -72,7 +53,6 @@ def get_project_details(request):
 
     if not project:
         return Response({"status": "error", "message": "Project not found", "data": {}}, status=404)
-
     
     # data = ProjectSerializer(project).data
     data = dict(ProjectSerializer(project).data)
@@ -137,7 +117,7 @@ def delete_project(request):
         "data": {}
     })
 
-# -------- Project Membership APIs -------- #
+# Project Membership APIs 
 
 @api_view(['POST'])
 def add_member(request):
