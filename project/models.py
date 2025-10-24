@@ -15,3 +15,19 @@ class Project(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class ProjectMember(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='memberships')
+    member = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='project_member')
+    is_admin = models.BooleanField(default=False)
+    status = models.CharField(max_length=1, default='1')  # '1' = active, '5' = removed
+    system_creation_time = models.DateTimeField(auto_now_add=True)
+    system_update_time = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'project_memberships'
+        unique_together = ('project', 'member')
+
+    def __str__(self):
+        return f"{self.member.first_name} → {self.project.title}"

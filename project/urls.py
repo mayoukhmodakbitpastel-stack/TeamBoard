@@ -23,10 +23,18 @@ Including another URLconf
 
 
 from django.urls import path
-from .views import create_project, get_project_details, list_projects, delete_project
+from .views import( create_project, get_project_details, 
+                   list_projects, delete_project,add_member, 
+                   remove_member, list_members)
 urlpatterns = [
     path('create', create_project, name='create_project'),
     path('project', get_project_details, name='get_project_details'),
     path('projects', list_projects, name='list_projects'),
     path('delete', delete_project, name='delete_project'),
+    
+    # Membership APIs
+    path('add_member', add_member, name='add_member'),
+    path('remove_member', remove_member, name='remove_member'),
+    path('members', list_members, name='list_members'),
+
 ]
