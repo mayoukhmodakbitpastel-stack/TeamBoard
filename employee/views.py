@@ -128,16 +128,23 @@ def delete_employee(request):
             if md5_hash_id(emp.id) == hashed_id:
                 employee = emp
                 break
+        # if id already deleted
+        if employee and employee.status == '5':
+            return Response({
+                "status": "ERROR",
+                "message": "Employee with the given id is already deleted",
+                "data": {}
+            }, status=status.HTTP_404_NOT_FOUND)
         if not employee:
             return Response({
                 "status": "ERROR",
-                "message": "No employee found with the given hashed_id",
+                "message": "No employee found with the given id.",
                 "data": {}
             }, status=status.HTTP_404_NOT_FOUND)
     else:
         return Response({
             "status": "ERROR",
-            "message": "Please provide either 'id' or 'hashed_id'.",
+            "message": "Please provide valid id.",
             "data": {}
         }, status=status.HTTP_400_BAD_REQUEST)
 
