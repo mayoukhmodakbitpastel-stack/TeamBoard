@@ -10,7 +10,6 @@ from .serializers import ProjectSerializer, ProjectMemberSerializer
 from .models import Project,ProjectMember
 from .md5_hash import md5_hash_project_id, md5_decode_project_id
 from employee.md5_hash import md5_hash_id as md5_hash_employee_id, md5_decode_id as md5_decode_employee_id
-
 @api_view(['POST'])
 def create_project(request):
     serializer = ProjectSerializer(data=request.data)
@@ -33,7 +32,7 @@ def create_project(request):
         }, status=drf_status.HTTP_201_CREATED)
     
     return Response({
-        "status": "error",
+        "status": "ERROR",
         "message": "Validation failed",
         "data": serializer.errors
     }, status=drf_status.HTTP_400_BAD_REQUEST)
@@ -41,18 +40,21 @@ def create_project(request):
     
 @api_view(['POST'])
 def get_project_details(request):
+    # show project if status is '1' (active) or '5' (deleted)
+    
     project_id = request.data.get('id')
     if not project_id:
-        return Response({"status": "error", "message": "Missing 'id'", "data": {}}, status=400)
+        return Response({"status": "ERROR", "message": "Missing 'id'", "data": {}}, status=400)
 
     if str(project_id).isdigit():
-        project = Project.objects.filter(id=project_id, status='1').first()
+        project = Project.objects.filter(id=project_id).first()
     else:
         decoded_id = md5_decode_project_id(project_id, Project)
-        project = Project.objects.filter(id=decoded_id, status='1').first()
+        
+        project = Project.objects.filter(id=decoded_id).first()
 
     if not project:
-        return Response({"status": "error", "message": "Project not found", "data": {}}, status=404)
+        return Response({"status": "ERROR", "message": "Project not found", "data": {}}, status=404)
     
     # data = ProjectSerializer(project).data
     data = dict(ProjectSerializer(project).data)
@@ -74,39 +76,65 @@ def get_project_details(request):
     }, status=200)
 @api_view(['POST'])
 def list_projects(request):
-    from django.core.paginator import Paginator
-    from .models import Project
-    from .serializers import ProjectSerializer
+    
+    limit = int(request.data.get('limit'))
+    page = int(request.data.get('page'))
 
-    limit = int(request.data.get('limit', 10))
-    page = int(request.data.get('page', 1))
+    projects = Project.objects.all()
+    status_filter = request.data.get('status')
+    if status_filter:
+        projects = projects.filter(status=status_filter)
+    try:
+        limit = int(limit) if limit is not None else None
+        page = int(page) if page is not None else None
+    except ValueError:
+        return Response({
+            "Status": "ERROR",
+            "Message": "Limit and page must be integers.",
+            "Data": {}
+        }, status=drf_status.HTTP_400_BAD_REQUEST)
+    if limit is not None and page is not None:
+        if limit <= 0 or page <= 0:
+            return Response({
+                "Status": "ERROR",
+                "Message": "Limit and page must be positive integers.",
+                "Data": {}
+            }, status=drf_status.HTTP_400_BAD_REQUEST)
 
-    projects = Project.objects.filter(status='1').order_by('-system_creation_time')
-    paginator = Paginator(projects, limit)
-    page_obj = paginator.get_page(page)
+        # Calculate start and end indices for slicing
+        start = (page - 1) * limit
+        end = start + limit
+        projects = projects[start:end]
 
-    serialized = ProjectSerializer(page_obj, many=True).data
+    serialized = ProjectSerializer(projects, many=True).data
 
     return Response({
         "status": "OK",
         "message": "Projects retrieved successfully",
         "data": serialized
-    })
+    }, status=drf_status.HTTP_200_OK)
 @api_view(['POST'])
 def delete_project(request):
     project_id = request.data.get('id')
 
     if not project_id:
-        return Response({"status": "error", "message": "Missing 'id'", "data": {}}, status=400)
+        return Response({"status": "ERROR", "message": "Missing 'id'", "data": {}}, status=400)
 
     if str(project_id).isdigit():
-        project = Project.objects.filter(id=project_id, status='1').first()
+        project = Project.objects.filter(id=project_id).first()
     else:
         decoded_id = md5_decode_project_id(project_id, Project)
-        project = Project.objects.filter(id=decoded_id, status='1').first()
+        project = Project.objects.filter(id=decoded_id).first()
 
     if not project:
-        return Response({"status": "error", "message": "Project not found", "data": {}}, status=404)
+        return Response({"status": "ERROR", "message": "Project not found", "data": {}}, status=404)
+    # if project already deleted
+    if project.status == '5':
+        return Response({
+            "status": "ERROR",
+            "message": "Project already deleted",
+            "data": {}
+        }, status=400)
 
     project.status = '5'
     project.save()

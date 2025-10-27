@@ -82,18 +82,46 @@ def create_message(request):
 @api_view(['POST'])
 def list_project_messages(request):
     project_id = request.data.get('project_id')
-    limit = int(request.data.get('limit', 10))
-    page = int(request.data.get('page', 1))
+    limit = int(request.data.get('limit'))
+    page = int(request.data.get('page'))
 
-    messages = ProjectMessage.objects.filter(status='1').order_by('-system_creation_time')
+    # messages = ProjectMessage.objects.filter(status='1').order_by('-system_creation_time') #only for active member msg
+    messages = ProjectMessage.objects.all().order_by('-system_creation_time') #all msgs
+    status_filter = request.data.get('status')
     if project_id:
         decoded_proj = md5_decode_project_id(project_id, Project)
         messages = messages.filter(project_id=decoded_proj)
+    if status_filter:
+        messages = messages.filter(status=status_filter)
+    # paginator = Paginator(messages, limit)
+    # page_obj = paginator.get_page(page)
+    
+    # Apply pagination only if both limit and page are valid integers
+    try:
+        limit = int(limit) if limit is not None else None
+        page = int(page) if page is not None else None
+    except ValueError:
+        return Response({
+            "Status": "ERROR",
+            "Message": "Limit and page must be integers.",
+            "Data": {}
+        }, status=drf_status.HTTP_400_BAD_REQUEST)
 
-    paginator = Paginator(messages, limit)
-    page_obj = paginator.get_page(page)
+    if limit is not None and page is not None:
+        if limit <= 0 or page <= 0:
+            return Response({
+                "Status": "ERROR",
+                "Message": "Limit and page must be positive integers.",
+                "Data": {}
+            }, status=drf_status.HTTP_400_BAD_REQUEST)
+            
 
-    serialized = ProjectMessageSerializer(page_obj, many=True).data
+        # Calculate start and end indices for slicing
+        start = (page - 1) * limit
+        end = start + limit
+        messages = messages[start:end]
+
+    serialized = ProjectMessageSerializer(messages, many=True).data
     return Response({
         "status": "OK",
         "message": "Messages retrieved successfully",

@@ -22,6 +22,7 @@ def create_employee(request):
             "Message": "Employees created successfully.",
             "Data": serializer.data,
         }, status=status.HTTP_201_CREATED)
+    
 
     # Print the errors to terminal and return them
     print(serializer.errors)
